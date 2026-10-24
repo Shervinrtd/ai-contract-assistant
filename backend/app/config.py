@@ -5,7 +5,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+
+# Settings come from environment variables, optionally via backend/.env (never committed).
+load_dotenv(BACKEND_DIR / ".env")
 
 # Everything generated at setup time lives under DATA_DIR (gitignored).
 DATA_DIR = Path(os.getenv("DATA_DIR", BACKEND_DIR / "data")).resolve()
@@ -38,3 +43,30 @@ def display_path(path: Path) -> str:
         return str(path.relative_to(BACKEND_DIR))
     except ValueError:
         return str(path)
+
+
+# ----------------------------------------------------------------- assistant
+
+# Any OpenAI-compatible Chat Completions endpoint works: OpenAI (default), Azure / Microsoft
+# Foundry, Groq, Ollama... Switching provider is a matter of these settings.
+LLM_API_KEY = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
+LLM_BASE_URL = os.getenv("LLM_BASE_URL") or None          # None = https://api.openai.com/v1
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-6-luna")
+# gpt-6-luna supports tool calling in Chat Completions only with reasoning effort "none".
+# Set to an empty value for providers that do not accept this parameter.
+LLM_REASONING_EFFORT = os.getenv("LLM_REASONING_EFFORT", "none").strip() or None
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "60"))
+
+# "auto": use the real model when an API key is configured, otherwise mock mode.
+# "openai": always use the real model.  "mock": always use the rule-based stand-in.
+LLM_MODE = os.getenv("LLM_MODE", "auto").strip().lower()
+
+AGENT_MAX_ROUNDS = int(os.getenv("AGENT_MAX_ROUNDS", "5"))  # model <-> tools round trips per question
+
+
+def assistant_mode() -> str:
+    if LLM_MODE == "mock":
+        return "mock"
+    if LLM_MODE == "openai" or LLM_API_KEY:
+        return "openai"
+    return "mock"

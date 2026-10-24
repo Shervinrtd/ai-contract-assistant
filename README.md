@@ -5,7 +5,7 @@ a contract list, a RAG assistant that answers from the contract PDFs with citati
 (contract, clause and page), an MCP server whose tools the LLM chooses to call, and an
 Angular frontend split into a host and a remote with Native Federation.
 
-> **Status:** steps 1-4 of 7 done: sample contract PDFs, PDF ingestion, the contracts API, the MCP server and clause retrieval.
+> **Status:** steps 1-5 of 7 done: the whole backend (PDF ingestion, contracts API, MCP server, retrieval and the AI assistant). The Angular frontend is next.
 > The full run guide, architecture notes and the RAG / MCP explanation will be added as the remaining steps land.
 
 ## Setup so far
@@ -48,6 +48,21 @@ python -m mcp_server              # serves http://127.0.0.1:8001/mcp
 python -m scripts.check_mcp       # optional, in a third terminal: lists the tools and calls each one
 ```
 
+**The assistant.** Configure the model once:
+
+```powershell
+copy .env.example .env            # macOS/Linux: cp .env.example .env
+notepad .env                      # set LLM_API_KEY=sk-...   (leave it empty for mock mode)
+```
+
+With the MCP server running, ask questions from the command line, or call `POST /chat` (restart `uvicorn` after
+editing `.env`):
+
+```powershell
+python -m scripts.ask "Which contracts expire in the next 30 days?"
+python -m scripts.ask --demo      # the six demo questions; add --mock to force mock mode
+```
+
 ## What the setup commands do
 
 1. **`generate_contracts`** turns the templates in `backend/sample_contracts/templates/` into five
@@ -76,8 +91,9 @@ Everything under `backend/data/` is generated and gitignored.
 | GET | `/contracts` | All contracts, soonest expiration first: id, title, counterparty, type, dates, status, days until expiration, `pdf_url` |
 | GET | `/contracts/{id}` | One contract (404 if unknown) |
 | GET | `/contracts/{id}/pdf` | The original PDF, served inline so `.../pdf#page=3` opens on page 3 |
+| POST | `/chat` | Ask the assistant: `{"message": "...", "history": [...]}` returns the answer, citations, tool-call trace and mode |
 
-Status is recalculated from today's date on every request, so a contract that passes its expiration date shows
+`/health` also reports `assistant_mode` (`openai` or `mock`) and the model, for the UI badge. Status is recalculated from today's date on every request, so a contract that passes its expiration date shows
 as "Expired" without re-running setup. If setup hasn't been run, the API answers `503` with the commands to run.
 CORS allows the Angular dev servers (`http://localhost:4200` and `:4201`); override with `CORS_ORIGINS`.
 
@@ -139,6 +155,47 @@ Known limitation: MiniLM is small, so very casual phrasing ("how do we get out o
 tool description asks the model to search in contract language ("early termination"), which fixes this in practice.
 A larger embedding model would be a drop-in improvement.
 
+## The assistant: how it uses RAG and the MCP tools
+
+`backend/app/agent.py` runs one loop per question:
+
+1. **Discover the tools.** Connect to the MCP server over Streamable HTTP and call `list_tools`. Each tool's name,
+   description and JSON schema become a function definition for the model.
+2. **Ask the model.** Send the system prompt, any earlier turns and the question, plus the tool definitions. The prompt
+   contains no contract facts, only rules: use `search_contract_clauses` for anything a contract says, `search_contracts`
+   for which contracts exist, `get_upcoming_expirations` for date windows; never compute dates; cite sources; say there's
+   not enough evidence instead of guessing.
+3. **Run the tools the model picks.** For every tool call, the backend executes it through MCP and returns the JSON
+   result to the model. Repeat until the model answers in text, for at most `AGENT_MAX_ROUNDS` (default 5).
+   Multi-step questions work naturally. For "of the contracts expiring in the next 90 days, which renew automatically?",
+   the model calls `get_upcoming_expirations(90)`, then `search_contract_clauses` for each result.
+4. **Check the citations.** The model cites `[C-003:8]` for a clause or `[C-001]` for contract data. The backend keeps
+   only ids that appeared in this conversation's tool results, renumbers them `[1]`, `[2]`... and attaches the label, a
+   quote and a PDF link to the cited page (`/contracts/C-003/pdf#page=2`). Invented ids are removed and reported in
+   `warnings`. `grounded: false` means the answer cites nothing.
+
+The response also carries the **tool-call trace** (tool, arguments, result summary, duration), so the UI can show which
+tools the model chose. The MCP server logs every call on its console too.
+
+**Model.** Any OpenAI-compatible Chat Completions endpoint works; it's all configuration in `.env`:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `LLM_API_KEY` | (empty) | API key. Empty means mock mode. |
+| `LLM_MODEL` | `gpt-6-luna` | OpenAI's cheapest current model. It supports tool calling in Chat Completions when reasoning is off. |
+| `LLM_REASONING_EFFORT` | `none` | Sent as `reasoning_effort`. Leave empty for providers that don't support it. |
+| `LLM_BASE_URL` | OpenAI | e.g. an Azure / Microsoft Foundry v1 endpoint, or Ollama's `http://localhost:11434/v1` |
+| `LLM_MODE` | `auto` | `auto` (real model if a key is set), `openai`, or `mock` |
+
+The larger GPT-6 models (`gpt-6.1-sol`, `gpt-6-astra`) only support tool calling through OpenAI's Responses API, so
+they aren't supported by this Chat Completions client. `gpt-5.4-mini` is a drop-in alternative. Provider errors
+(bad key, quota, unsupported model) come back as `502` with the provider's message; an unreachable MCP server gives `503`.
+
+**Mock mode** (`backend/app/mock_llm.py`) is used when no API key is set. It replaces only the model: keyword rules pick
+the same tools a model would (including multi-step plans) and the answer quotes the retrieved clauses. The MCP calls,
+retrieval and citation checking are all real. Answers are labelled as mock, and `/health` reports
+`assistant_mode: "mock"`. It's meant for trying the UI and API without a key, not as a replacement for the model.
+
 ## Sample contracts
 
 | ID | Contract | Counterparty | Expires | Built to test |
@@ -161,8 +218,12 @@ backend/
     queries.py                contract search and expiration look-ups (used by the MCP tools)
     retrieval.py              Chroma vector index: build, semantic clause search, evidence threshold
     mcp_client.py             MCP client: connect, list tools, call tools
+    agent.py                  the assistant: tool-calling loop, system prompt, citation checking
+    llm.py                    OpenAI-compatible Chat Completions client
+    mock_llm.py               rule-based stand-in used in mock mode
     routers/
       contracts.py            /contracts endpoints and PDF serving
+      chat.py                 POST /chat
     ingestion/
       pdf_extract.py          PDF -> per-page Markdown, header/footer removal
       chunking.py             clause chunks with page ranges and citations
@@ -176,6 +237,8 @@ backend/
     generate_contracts.py     step: create the sample PDFs
     ingest.py                 step: load SQLite, extract and chunk the PDFs, build the index
     check_mcp.py              smoke test for the MCP server
+    ask.py                    ask the assistant from the command line (--demo, --mock)
+  .env.example                settings template (copy to .env)
   requirements.txt
 ```
 

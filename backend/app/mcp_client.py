@@ -34,9 +34,20 @@ async def mcp_session(url: str | None = None) -> AsyncIterator[ClientSession]:
                 yield session
     except Exception as exc:
         cause = _connection_error(exc)
-        if cause is None:
-            raise
-        raise MCPUnavailable(f"Cannot reach the MCP server at {target} ({type(cause).__name__})") from None
+        if cause is not None:
+            raise MCPUnavailable(f"Cannot reach the MCP server at {target} ({type(cause).__name__})") from None
+        # Errors raised inside the `async with` body (e.g. the model provider rejecting the key)
+        # come back wrapped in anyio exception groups; re-raise the original error.
+        inner = _single_error(exc)
+        if inner is not exc:
+            raise inner from None
+        raise
+
+
+def _single_error(exc: BaseException) -> BaseException:
+    while len(getattr(exc, "exceptions", None) or ()) == 1:
+        exc = exc.exceptions[0]
+    return exc
 
 
 def _connection_error(exc: BaseException) -> BaseException | None:
