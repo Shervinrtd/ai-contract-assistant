@@ -16,6 +16,9 @@ EXTRACTED_DIR = DATA_DIR / "extracted"           # Markdown extracted from each 
 CHUNKS_FILE = DATA_DIR / "chunks.json"           # clause-level chunks with page ranges
 DB_FILE = DATA_DIR / "contracts.db"              # SQLite store for the contract list
 
+# Where the backend reaches the MCP server (127.0.0.1 avoids slow IPv6 "localhost" lookups on Windows).
+MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8001/mcp")
+
 # Frontend origins allowed to call the API (Angular host and remote dev servers).
 CORS_ORIGINS = [
     o.strip()
