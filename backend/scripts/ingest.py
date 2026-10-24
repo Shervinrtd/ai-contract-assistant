@@ -1,11 +1,12 @@
-"""Ingest the contract PDFs: extract Markdown page by page and split it into clause chunks.
+"""Ingest the contracts: load the list into SQLite, then extract and chunk the PDFs.
 
 Inputs : data/contracts/*.pdf and data/contracts/metadata.json (from generate_contracts)
-Outputs: data/extracted/<id>.md  (what the model will "see", for inspection)
+Outputs: data/contracts.db       (SQLite table behind the contract list)
+         data/extracted/<id>.md  (what the model will "see", for inspection)
          data/chunks.json        (clause chunks with page ranges)
 
-Later steps extend this script to load the metadata into SQLite and build the
-vector index, so setup stays a single command.
+A later step extends this script to build the vector index, so setup stays a
+single command.
 
 Usage (from the backend folder):
     python -m scripts.ingest [--show-chunks]
@@ -16,7 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from app import config
+from app import config, db
 from app.ingestion.chunking import chunk_contract
 from app.ingestion.pdf_extract import extract_pages, pages_to_markdown
 
@@ -29,6 +30,9 @@ def main(argv: list[str] | None = None) -> None:
     if not config.METADATA_FILE.exists():
         raise SystemExit("No contracts found. Run `python -m scripts.generate_contracts` first.")
     metadata = json.loads(config.METADATA_FILE.read_text(encoding="utf-8"))
+
+    count = db.replace_contracts(metadata["contracts"])
+    print(f"Loaded {count} contracts into {config.display_path(config.DB_FILE)}\n")
 
     config.EXTRACTED_DIR.mkdir(parents=True, exist_ok=True)
     all_chunks = []
@@ -47,7 +51,7 @@ def main(argv: list[str] | None = None) -> None:
                 print(f"    {c.chunk_id:<34} p.{pages_label:<5} {c.heading}")
 
     config.CHUNKS_FILE.write_text(json.dumps([c.to_dict() for c in all_chunks], indent=2), encoding="utf-8")
-    print(f"\nWrote {len(all_chunks)} chunks to {config.CHUNKS_FILE.relative_to(config.BACKEND_DIR)}")
+    print(f"\nWrote {len(all_chunks)} chunks to {config.display_path(config.CHUNKS_FILE)}")
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> None:
 
     metadata = {"generated_on": today.isoformat(), "company": COMPANY_NAME, "contracts": records}
     config.METADATA_FILE.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-    print(f"\nWrote {len(records)} PDFs and {config.METADATA_FILE.relative_to(config.BACKEND_DIR)}")
+    print(f"\nWrote {len(records)} PDFs and {config.display_path(config.METADATA_FILE)}")
 
 
 if __name__ == "__main__":
