@@ -18,7 +18,7 @@ from typing import Annotated, Literal
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
-from app import queries
+from app import queries, retrieval
 from app.db import ContractRecord
 
 log = logging.getLogger("mcp_server")
@@ -30,8 +30,9 @@ mcp = FastMCP(
     name="contract-tools",
     instructions=(
         "Tools for looking up the company's contracts. Use search_contracts to find contracts "
-        "by name, counterparty, type or status, and get_upcoming_expirations for questions about "
-        "contracts expiring within a period. All dates are ISO (YYYY-MM-DD)."
+        "by name, counterparty, type or status; get_upcoming_expirations for questions about "
+        "contracts expiring within a period; and search_contract_clauses to read what the contracts "
+        "actually say, with citations. All dates are ISO (YYYY-MM-DD)."
     ),
     host=HOST,
     port=PORT,
@@ -79,6 +80,33 @@ class UpcomingExpirationsResult(BaseModel):
     days: int
     count: int
     contracts: list[ContractSummary] = Field(description="Active contracts in the window, soonest first")
+
+
+class ClauseResult(BaseModel):
+    chunk_id: str = Field(description="Stable id of the clause chunk, e.g. C-003:8")
+    contract_id: str
+    contract_title: str
+    counterparty: str
+    clause_number: str | None = Field(description="None for the preamble or signature block")
+    heading: str
+    page_start: int
+    page_end: int
+    citation: str = Field(description="Ready-made citation, e.g. 'Master Supply Agreement (C-003), clause 8, pp. 2-3'")
+    score: float = Field(description="Similarity to the query, 0-1; above ~0.4 is a strong match")
+    text: str = Field(description="The clause text as extracted from the PDF")
+
+
+class SearchClausesResult(BaseModel):
+    query: str
+    contract_id: str | None
+    group_by_contract: bool
+    contracts_checked: list[str]
+    contracts_without_match: list[str] = Field(
+        description="Contracts searched where no clause scored above the relevance threshold"
+    )
+    weak_matches_only: bool = Field(description="True if nothing matched well; results are only the closest passages")
+    note: str | None = None
+    results: list[ClauseResult]
 
 
 # -------------------------------------------------------------------- tools
@@ -134,11 +162,69 @@ def get_upcoming_expirations(
     )
 
 
+@mcp.tool()
+def search_contract_clauses(
+    query: Annotated[
+        str,
+        Field(min_length=2, description="What to look for, in contract language, e.g. 'termination for "
+                                        "convenience notice period', 'automatic renewal', 'limitation of "
+                                        "liability cap'. Turn casual wording ('get out of the deal early') "
+                                        "into the legal term ('early termination')."),
+    ],
+    contract_id: Annotated[
+        str | None,
+        Field(description="Restrict the search to one contract, e.g. 'C-003'. If you only know the name "
+                          "or counterparty, call search_contracts first to get the id."),
+    ] = None,
+    group_by_contract: Annotated[
+        bool,
+        Field(description="Set to true for questions that must be checked in every contract, e.g. 'which "
+                          "contracts renew automatically?'. Returns the best clauses from each contract "
+                          "instead of the overall top matches. Ignored when contract_id is given."),
+    ] = False,
+    top_k: Annotated[int, Field(ge=1, le=10, description="Maximum number of clauses (when not grouping).")] = 5,
+) -> SearchClausesResult:
+    """Search the text of the contracts and return the most relevant clauses, with citations.
+
+    Use this for any question about what the contracts say: termination, renewal, notice
+    periods, fees, liability, confidentiality, data protection, obligations and so on.
+    Each result has the clause text and a citation (contract, clause number, pages).
+    Answer only from the returned text and cite it. If `weak_matches_only` is true,
+    nothing matched well: rephrase the query once in contract terms, and if that still
+    finds nothing, say the contracts do not provide enough evidence.
+    """
+    cid = contract_id.strip().upper() if contract_id else None
+    log.info("tool call: search_contract_clauses(query=%r, contract_id=%r, group_by_contract=%r, top_k=%r)",
+             query, cid, group_by_contract, top_k)
+    if cid and cid not in retrieval.contract_ids():
+        raise ValueError(f"Unknown contract id {cid!r}. Use search_contracts to find valid ids.")
+
+    outcome = retrieval.search(query, contract_id=cid, top_k=top_k, group_by_contract=group_by_contract)
+    note = None
+    if outcome.weak_matches_only:
+        note = ("No clause matched strongly. These are only the closest passages and may not answer "
+                "the question; rephrase in contract terms or report insufficient evidence.")
+    return SearchClausesResult(
+        query=query,
+        contract_id=cid,
+        group_by_contract=group_by_contract and not cid,
+        contracts_checked=outcome.contracts_checked,
+        contracts_without_match=outcome.contracts_without_match,
+        weak_matches_only=outcome.weak_matches_only,
+        note=note,
+        results=[ClauseResult(**h.to_dict()) for h in outcome.hits],
+    )
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     # Keep the console readable: hide the SDK's per-request chatter, keep our tool-call lines.
     for noisy in ("mcp.server.streamable_http", "mcp.server.streamable_http_manager", "mcp.server.lowlevel.server"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
+    try:
+        retrieval.warm_up()  # load the embedding model now rather than on the first question
+    except Exception as exc:  # keep serving the other tools; the clause tool will report the problem
+        log.warning("clause search not ready: %s", exc)
     log.info("MCP server listening on http://%s:%s/mcp", HOST, PORT)
     mcp.run(transport="streamable-http")
 

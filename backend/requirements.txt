@@ -2,6 +2,9 @@
 fastapi>=0.115,<1
 uvicorn[standard]>=0.30,<1
 
+# Vector index for clause search (local ONNX embeddings, no API key needed)
+chromadb>=1.5,<2
+
 # MCP server and client (official SDK, v1 line; v2 renamed the main classes)
 mcp>=1.30,<2
 

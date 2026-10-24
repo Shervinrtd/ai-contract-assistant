@@ -15,6 +15,11 @@ METADATA_FILE = CONTRACTS_DIR / "metadata.json"  # list metadata written by the 
 EXTRACTED_DIR = DATA_DIR / "extracted"           # Markdown extracted from each PDF (for inspection)
 CHUNKS_FILE = DATA_DIR / "chunks.json"           # clause-level chunks with page ranges
 DB_FILE = DATA_DIR / "contracts.db"              # SQLite store for the contract list
+CHROMA_DIR = DATA_DIR / "chroma"                 # vector index of clause chunks
+
+# Clause search: hits below this cosine similarity are treated as "no evidence".
+# Calibrated for the default all-MiniLM-L6-v2 embeddings on the sample contracts.
+RETRIEVAL_MIN_SCORE = float(os.getenv("RETRIEVAL_MIN_SCORE", "0.25"))
 
 # Where the backend reaches the MCP server (127.0.0.1 avoids slow IPv6 "localhost" lookups on Windows).
 MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8001/mcp")

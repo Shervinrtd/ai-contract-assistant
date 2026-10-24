@@ -19,6 +19,10 @@ CALLS = [
     ("get_upcoming_expirations", {"days": 30}),
     ("get_upcoming_expirations", {"days": 90}),
     ("get_upcoming_expirations", {"days": -5}),  # invalid on purpose: should be rejected
+    ("search_contract_clauses", {"query": "termination conditions", "contract_id": "C-003", "top_k": 2}),
+    ("search_contract_clauses", {"query": "automatic renewal of the term", "group_by_contract": True}),
+    ("search_contract_clauses", {"query": "termination conditions", "contract_id": "C-004", "top_k": 2}),
+    ("search_contract_clauses", {"query": "parental leave policy for employees"}),
 ]
 
 
@@ -39,6 +43,12 @@ async def main() -> int:
                     print("  rejected:", " ".join(c.text for c in result.content if hasattr(c, "text"))[:200])
                     continue
                 payload = result_payload(result)
+                if "results" in payload:  # clause search
+                    if payload["weak_matches_only"]:
+                        print("  weak matches only:", payload["note"])
+                    for hit in payload["results"]:
+                        print(f"  {hit['score']:.2f}  {hit['citation']}")
+                    continue
                 for c in payload.get("contracts", []):
                     print(f"  {c['id']}  {c['title']:<45} {c['expiration_date']}  "
                           f"{c['status']:<8} {c['days_until_expiration']:>4} days")

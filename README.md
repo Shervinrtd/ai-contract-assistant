@@ -5,7 +5,7 @@ a contract list, a RAG assistant that answers from the contract PDFs with citati
 (contract, clause and page), an MCP server whose tools the LLM chooses to call, and an
 Angular frontend split into a host and a remote with Native Federation.
 
-> **Status:** steps 1-3 of 7 done: sample contract PDFs, the PDF ingestion pipeline, the contracts API and the MCP server.
+> **Status:** steps 1-4 of 7 done: sample contract PDFs, PDF ingestion, the contracts API, the MCP server and clause retrieval.
 > The full run guide, architecture notes and the RAG / MCP explanation will be added as the remaining steps land.
 
 ## Setup so far
@@ -37,6 +37,10 @@ uvicorn app.main:app --reload --port 8000
 
 Then open http://localhost:8000/docs for the interactive API documentation.
 
+The first `ingest` run downloads the local embedding model (about 80 MB) into `~/.cache/chroma`
+(on Windows `C:\Users\<you>\.cache\chroma`). Later runs reuse it. **Stop the MCP server before re-running
+`ingest`**, because Windows locks the index files while the server has them open.
+
 **MCP server.** Start it in a second terminal from the `backend` folder, with the virtual environment active:
 
 ```powershell
@@ -58,7 +62,8 @@ python -m scripts.check_mcp       # optional, in a third terminal: lists the too
      pass removes any short line that repeats on most pages, in case one slips through.
    - **One chunk per clause.** Sub-clauses (8.1, 8.2...) stay with their clause, and each chunk records
      the pages it spans, e.g. *Master Supply Agreement (C-003), clause 8, pp. 2-3*.
-   - **Outputs** go to `backend/data/extracted/<id>.md` (exactly what the model will see) and
+   - **Embeds every chunk into a local vector index** (`backend/data/chroma/`); see [Clause retrieval](#clause-retrieval).
+   - **Outputs** also include `backend/data/extracted/<id>.md` (exactly what the model will see) and
      `backend/data/chunks.json`.
 
 Everything under `backend/data/` is generated and gitignored.
@@ -86,8 +91,7 @@ process, so the assistant talks to it over real MCP, and so can any other MCP cl
 |---|---|---|
 | `search_contracts` | `query` (words matched against title, counterparty and type), `status` (`Active` / `Expired`), both optional | Matching contracts with dates, status and days until expiration |
 | `get_upcoming_expirations` | `days` (0-3650) | Active contracts expiring between today and today + `days`, soonest first, plus the date window used |
-
-A third tool, `search_contract_clauses` (semantic search over clause chunks), arrives with the vector index in step 4.
+| `search_contract_clauses` | `query`, optional `contract_id`, `group_by_contract`, `top_k` | The most relevant clauses with their text, a ready-made citation (contract, clause, pages) and a similarity score |
 
 - **Tool descriptions are written as documentation**: what the tool does, when to use it, and what it returns.
   They're what the LLM reads when deciding which tool to call.
@@ -104,6 +108,36 @@ npx @modelcontextprotocol/inspector
 
 In the page that opens, choose **Transport: Streamable HTTP**, enter `http://127.0.0.1:8001/mcp`, click
 **Connect**, then **Tools → List Tools** and run either tool.
+
+## Clause retrieval
+
+This is the retrieval half of RAG. The assistant (next step) calls `search_contract_clauses` and answers only from
+the clauses it returns.
+
+- **Index.** [Chroma](https://www.trychroma.com/) running locally, cosine similarity, one document per clause chunk.
+  What gets embedded is the contract title and clause heading followed by the clause text, so "termination in the
+  Helix contract" matches on both the contract and the topic.
+- **Embeddings.** `all-MiniLM-L6-v2`, Chroma's default model, runs on your machine through ONNX Runtime. No API key
+  is needed, so retrieval also works in mock mode. Telemetry is switched off.
+- **Filters.** `contract_id` searches inside one contract. `group_by_contract=true` searches each contract separately
+  and returns its best clauses. That's how "which contracts renew automatically?" checks all five contracts instead
+  of returning the top five chunks from two of them.
+- **"Not enough evidence".** Matches scoring below 0.25 (`RETRIEVAL_MIN_SCORE`) are dropped. If nothing passes, the
+  tool returns the closest three, flagged `weak_matches_only` with a note, so the model can rephrase or say the
+  contracts don't cover the question instead of guessing.
+
+How it ranks the demo questions:
+
+| Query | Top result | Score |
+|---|---|---|
+| termination conditions (C-003) | Master Supply Agreement, clause 8 Termination, pp. 2-3 | 0.50 |
+| automatic renewal (per contract) | each contract's Term / Term and Renewal / Duration clause | 0.26-0.56 |
+| termination conditions (C-004, the NDA) | clause 6 Duration only; the NDA has no termination clause | 0.26 |
+| parental leave policy | nothing relevant, so weak matches only | < 0.25 |
+
+Known limitation: MiniLM is small, so very casual phrasing ("how do we get out of the deal early?") scores low. The
+tool description asks the model to search in contract language ("early termination"), which fixes this in practice.
+A larger embedding model would be a drop-in improvement.
 
 ## Sample contracts
 
@@ -125,6 +159,7 @@ backend/
     db.py                     SQLite contract store
     schemas.py                API response models
     queries.py                contract search and expiration look-ups (used by the MCP tools)
+    retrieval.py              Chroma vector index: build, semantic clause search, evidence threshold
     mcp_client.py             MCP client: connect, list tools, call tools
     routers/
       contracts.py            /contracts endpoints and PDF serving
@@ -139,7 +174,7 @@ backend/
     pdf_writer.py             contract documents -> PDF (fpdf2)
   scripts/
     generate_contracts.py     step: create the sample PDFs
-    ingest.py                 step: load SQLite, extract and chunk the PDFs
+    ingest.py                 step: load SQLite, extract and chunk the PDFs, build the index
     check_mcp.py              smoke test for the MCP server
   requirements.txt
 ```

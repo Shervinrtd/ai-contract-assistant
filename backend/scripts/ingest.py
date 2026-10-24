@@ -4,9 +4,10 @@ Inputs : data/contracts/*.pdf and data/contracts/metadata.json (from generate_co
 Outputs: data/contracts.db       (SQLite table behind the contract list)
          data/extracted/<id>.md  (what the model will "see", for inspection)
          data/chunks.json        (clause chunks with page ranges)
+         data/chroma/            (vector index of the chunks, local embeddings)
 
-A later step extends this script to build the vector index, so setup stays a
-single command.
+The first run downloads the embedding model (about 80 MB) into ~/.cache/chroma.
+Stop the MCP server before re-running this script (Windows locks the index files).
 
 Usage (from the backend folder):
     python -m scripts.ingest [--show-chunks]
@@ -17,7 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from app import config, db
+from app import config, db, retrieval
 from app.ingestion.chunking import chunk_contract
 from app.ingestion.pdf_extract import extract_pages, pages_to_markdown
 
@@ -52,6 +53,10 @@ def main(argv: list[str] | None = None) -> None:
 
     config.CHUNKS_FILE.write_text(json.dumps([c.to_dict() for c in all_chunks], indent=2), encoding="utf-8")
     print(f"\nWrote {len(all_chunks)} chunks to {config.display_path(config.CHUNKS_FILE)}")
+
+    print("Building the clause index (the first run downloads the embedding model)...")
+    indexed = retrieval.build_index(all_chunks)
+    print(f"Indexed {indexed} chunks in {config.display_path(config.CHROMA_DIR)}")
 
 
 if __name__ == "__main__":
