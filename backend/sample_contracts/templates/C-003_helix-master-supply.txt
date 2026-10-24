@@ -1,0 +1,103 @@
+contract_id: C-003
+slug: helix-master-supply
+title: Master Supply Agreement
+contract_type: Supply agreement
+counterparty: Helix Components S.p.A.
+counterparty_description: a company incorporated in Italy with its registered office in Turin, Italy
+counterparty_role: Supplier
+counterparty_signatory: Roberto Galli
+counterparty_signatory_title: Sales Director
+company_role: Buyer
+term_months: 24
+expires_in_days: 425
+===
+# Background
+The Supplier designs and manufactures electronic components and sensor modules for industrial applications.
+
+The Buyer incorporates sensor modules into its industrial monitoring devices and wishes to purchase them from the Supplier under a framework agreement on the terms set out below.
+
+## Definitions
+In this Agreement the following definitions apply:
+- "Order" means a purchase order for Products issued by the Buyer and accepted by the Supplier under clause {ref:Orders and Forecasts}.2;
+- "Price List" means the prices for the Products set out in Schedule 2, as adjusted under clause {ref:Prices and Payment}.2;
+- "Products" means the sensor modules and related components listed in Schedule 1, as updated by agreement between the parties from time to time;
+- "Specification" means the technical specification for each Product agreed in writing between the parties.
+
+## Scope of the Agreement
+This Agreement sets out the terms on which the Supplier shall sell and the Buyer shall purchase Products. Each Order shall form a separate contract incorporating the terms of this Agreement.
+
+This Agreement does not oblige the Buyer to purchase any minimum quantity of Products, except where a binding forecast has been agreed in writing.
+
+If there is any conflict between this Agreement and an Order, this Agreement shall prevail unless the Order expressly states otherwise and is signed by both parties.
+
+## Orders and Forecasts
+The Buyer shall provide the Supplier with a rolling, non-binding forecast of its requirements for the following six (6) months, updated each month.
+
+The Supplier shall accept or reject each purchase order within three (3) working days of receipt. A purchase order that is not rejected within that period shall be deemed accepted.
+
+The Buyer may cancel or reschedule any Order without charge up to thirty (30) days before the confirmed delivery date.
+
+## Prices and Payment
+The prices for the Products are set out in the Price List and are fixed for the first twelve (12) months after the Effective Date.
+
+After that period, the Supplier may adjust the Price List once in each twelve (12) month period by giving at least ninety (90) days' written notice, provided that any increase reflects documented changes in the cost of raw materials and does not exceed six per cent (6%).
+
+The Supplier shall invoice each delivery on dispatch. The Buyer shall pay each undisputed invoice within sixty (60) days from the end of the month of the invoice date.
+
+## Delivery
+The Supplier shall deliver the Products DAP (Incoterms 2020) to the Buyer's facility in Bologna on the delivery date stated in the Order.
+
+If the Supplier fails to deliver on the confirmed delivery date, it shall pay liquidated damages of one per cent (1%) of the value of the delayed Products for each full week of delay, up to a maximum of ten per cent (10%) of that value.
+
+Risk in the Products shall pass to the Buyer on delivery. Title to the Products shall pass to the Buyer on payment in full.
+
+## Quality and Warranty
+The Supplier shall maintain a quality management system certified to ISO 9001 throughout the Term.
+
+The Supplier warrants that for twenty-four (24) months from delivery the Products shall conform to the Specification, be free from defects in materials and workmanship, and comply with the RoHS and REACH regulations.
+
+The Buyer may reject any defective Products within thirty (30) days of delivery. The Supplier shall, at the Buyer's option, repair or replace the defective Products or refund their price.
+
+## Term and Renewal
+This Agreement shall commence on the Effective Date and shall continue for an initial term of {initial_term}, ending on {expiration_date} (the "Initial Term").
+
+After the Initial Term, this Agreement shall renew automatically for successive periods of twelve (12) months each, unless either party gives the other party written notice of non-renewal at least six (6) months before the end of the Initial Term or of the then-current renewal period. The Initial Term and any renewal periods are together referred to as the "Term".
+
+## Termination
+Either party may terminate this Agreement for convenience at any time by giving the other party not less than ninety (90) days' written notice.
+
+Either party may terminate this Agreement with immediate effect by written notice if the other party commits a material breach of this Agreement which is irremediable or, if remediable, is not remedied within thirty (30) days after receipt of written notice specifying the breach.
+
+Either party may terminate this Agreement with immediate effect by written notice if the other party is declared insolvent or bankrupt, becomes subject to any insolvency, liquidation or composition proceedings, or ceases to trade.
+
+The Buyer may terminate this Agreement by giving thirty (30) days' written notice if the Supplier undergoes a change of control in favour of a competitor of the Buyer, or if the Supplier fails to achieve an on-time delivery rate of at least ninety-five per cent (95%) for three (3) consecutive months.
+
+On termination or expiry of this Agreement:
+- (a) all Orders accepted before the date of termination shall be fulfilled in accordance with their terms, unless the Buyer elects in writing to cancel them;
+- (b) the Buyer shall pay all undisputed invoices for Products delivered up to the date of termination;
+- (c) the Supplier shall return to the Buyer all tooling, drawings and Specifications owned by the Buyer within fifteen (15) working days; and
+- (d) the Supplier shall continue to supply spare parts for the Products for three (3) years at the prices then in force.
+
+Termination or expiry shall not affect any rights, remedies, obligations or liabilities of the parties that have accrued up to the date of termination or expiry. The clauses on confidentiality, limitation of liability, warranty and governing law shall continue in force.
+
+## Intellectual Property and Tooling
+Each party retains ownership of its pre-existing intellectual property. Nothing in this Agreement transfers any intellectual property right from one party to the other.
+
+Any tooling, moulds or test fixtures paid for by the Buyer shall become the property of the Buyer, shall be clearly marked as such, and shall be used by the Supplier only to manufacture Products for the Buyer.
+
+@include confidentiality
+
+## Limitation of Liability
+Nothing in this Agreement limits or excludes either party's liability for death or personal injury caused by negligence, for fraud, or for any other liability that cannot be limited or excluded by law.
+
+Subject to clause {n}.1, neither party shall be liable for any loss of profits, loss of business or any indirect or consequential loss arising under or in connection with this Agreement.
+
+Subject to clause {n}.1, each party's total aggregate liability under this Agreement shall not exceed the total amounts paid by the Buyer under this Agreement in the twelve (12) months preceding the claim, except that this limit shall not apply to the Supplier's obligations under clause {ref:Quality and Warranty}.
+
+@include force_majeure_with_termination
+
+@include notices
+
+@include general
+
+@include governing_law

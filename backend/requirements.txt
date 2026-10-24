@@ -1,0 +1,9 @@
+# Sample contract generation
+fpdf2>=2.8,<3
+
+# PDF -> Markdown extraction.
+# Pinned on purpose: pymupdf4llm requires the exact matching PyMuPDF version,
+# and the unpinned "latest" release (2.0) installs an empty package.
+# Licence note: PyMuPDF / pymupdf4llm are AGPL-3.0 (fine for this prototype;
+# a commercial product would need a licence or a permissive alternative such as pypdf).
+pymupdf4llm==1.28.2

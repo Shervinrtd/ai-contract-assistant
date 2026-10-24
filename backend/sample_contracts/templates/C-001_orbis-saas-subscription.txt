@@ -1,0 +1,89 @@
+contract_id: C-001
+slug: orbis-saas-subscription
+title: Software-as-a-Service Subscription Agreement
+contract_type: SaaS subscription
+counterparty: Orbis Cloud GmbH
+counterparty_description: a company incorporated in Germany with its registered office in Munich, Germany
+counterparty_role: Provider
+counterparty_signatory: Lukas Brenner
+counterparty_signatory_title: Managing Director
+company_role: Customer
+term_months: 12
+expires_in_days: 20
+===
+# Background
+The Provider operates Orbis Insight, a cloud-based data analytics and reporting platform that it makes available to its customers on a subscription basis.
+
+The Customer wishes to subscribe to the platform for use by its internal teams, and the Provider has agreed to provide it on the terms of this Agreement.
+
+## Definitions and Interpretation
+In this Agreement the following definitions apply:
+- "Authorised Users" means the employees and contractors of the Customer who are permitted to use the Services, up to the number stated in clause {ref:Services}.2;
+- "Customer Data" means all data uploaded to, stored in or processed by the Services by or on behalf of the Customer;
+- "Order Form" means the order form signed by the parties on or before the Effective Date, which forms part of this Agreement;
+- "Services" means the Orbis Insight platform and the related support services described in this Agreement.
+
+Clause headings do not affect the interpretation of this Agreement. References to clauses are to the clauses of this Agreement.
+
+## Services
+The Provider shall make the Services available to the Customer and its Authorised Users during the Term in accordance with this Agreement and the Order Form.
+
+The Customer may use the Services for up to one hundred and fifty (150) Authorised Users. Additional users may be added at any time at the per-user rate set out in the Order Form, pro-rated for the remainder of the then-current term.
+
+The Provider may update the functionality of the Services from time to time, provided that no update materially reduces the functionality available to the Customer.
+
+## Term and Renewal
+This Agreement shall commence on the Effective Date and shall continue for an initial term of {initial_term}, ending on {expiration_date} (the "Initial Term").
+
+At the end of the Initial Term, this Agreement shall automatically renew for successive periods of twelve (12) months (each a "Renewal Term"), unless either party gives the other party written notice of non-renewal at least thirty (30) days before the end of the Initial Term or of the then-current Renewal Term.
+
+The Initial Term together with any Renewal Terms is referred to as the "Term".
+
+## Fees and Payment
+The Customer shall pay the Provider an annual subscription fee of EUR 48,000 (forty-eight thousand euros), exclusive of VAT.
+
+The Provider shall invoice the subscription fee annually in advance. The Customer shall pay each valid invoice within thirty (30) days of the date of the invoice.
+
+The Provider may increase the subscription fee for any Renewal Term by giving the Customer at least sixty (60) days' written notice before the start of that Renewal Term, provided that the increase does not exceed five per cent (5%) of the fee for the previous term.
+
+If the Customer fails to pay any undisputed amount by its due date, the Provider may charge interest on the overdue amount at the statutory rate for late payment in commercial transactions.
+
+## Service Levels and Support
+The Provider shall use commercially reasonable efforts to make the Services available 99.5% of the time in each calendar month, excluding planned maintenance notified to the Customer at least forty-eight (48) hours in advance.
+
+If availability falls below 99.5% in any calendar month, the Customer shall be entitled to a service credit of five per cent (5%) of the monthly equivalent of the subscription fee for each full 0.5% below that target, up to a maximum of twenty-five per cent (25%).
+
+The Customer may submit support requests by email or through the support portal. The Provider shall respond to critical incidents within two (2) hours and to all other requests within one (1) working day.
+
+## Customer Data and Data Protection
+The Customer shall own all rights, title and interest in and to the Customer Data.
+
+To the extent that the Provider processes personal data on behalf of the Customer, the parties shall comply with the data processing agreement attached to the Order Form, and the Provider shall act only on the documented instructions of the Customer in accordance with the General Data Protection Regulation (EU) 2016/679.
+
+The Provider shall host all Customer Data in data centres located within the European Economic Area.
+
+@include confidentiality
+
+## Limitation of Liability
+Nothing in this Agreement limits or excludes either party's liability for death or personal injury caused by negligence, for fraud, or for any other liability that cannot be limited or excluded by law.
+
+Subject to clause {n}.1, neither party shall be liable for any loss of profits, loss of business, loss of goodwill, or any indirect or consequential loss arising under or in connection with this Agreement.
+
+Subject to clause {n}.1, each party's total aggregate liability arising under or in connection with this Agreement shall not exceed the total subscription fees paid or payable by the Customer in the twelve (12) months preceding the event giving rise to the claim.
+
+## Termination
+Either party may terminate this Agreement with immediate effect by giving written notice to the other party if the other party commits a material breach of this Agreement and, where the breach is capable of remedy, fails to remedy it within thirty (30) days after being notified in writing of the breach.
+
+Either party may terminate this Agreement with immediate effect by giving written notice to the other party if the other party becomes insolvent, enters into liquidation or any composition with its creditors, or ceases to carry on business.
+
+The Customer may not terminate this Agreement for convenience during the Initial Term. During any Renewal Term, the Customer may terminate this Agreement for convenience by giving the Provider at least ninety (90) days' written notice, in which case no refund of prepaid fees shall be due.
+
+On termination or expiry of this Agreement for any reason, the Provider shall make the Customer Data available to the Customer for export in a commonly used format for thirty (30) days, after which it shall securely delete the Customer Data unless it is required by law to retain it.
+
+@include force_majeure_with_termination
+
+@include notices
+
+@include general
+
+@include governing_law

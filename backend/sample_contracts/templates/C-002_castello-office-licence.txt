@@ -1,0 +1,92 @@
+contract_id: C-002
+slug: castello-office-licence
+title: Office Space Licence Agreement
+contract_type: Office lease
+counterparty: Castello Immobiliare S.r.l.
+counterparty_description: a company incorporated in Italy with its registered office in Bologna, Italy
+counterparty_role: Licensor
+counterparty_signatory: Elena Marchetti
+counterparty_signatory_title: Chief Executive Officer
+company_role: Licensee
+term_months: 24
+expires_in_days: 75
+===
+# Background
+The Licensor owns and manages the Castello Business Centre in Bologna, a multi-tenant office building offering serviced office space.
+
+The Licensee requires office space for its operations team, and the Licensor has agreed to grant the Licensee a licence to occupy part of the building on the terms of this Agreement.
+
+## Definitions
+In this Agreement the following definitions apply:
+- "Building" means the Castello Business Centre, Bologna, including its car park and landscaped areas;
+- "Common Parts" means the entrances, lifts, corridors, kitchens, meeting rooms and other areas of the Building made available for use by all occupiers;
+- "Licence Fee" means the monthly fee payable under clause {ref:Licence Fee and Charges}.1;
+- "Premises" means the office space of approximately 240 square metres on the third floor of the Building, shown on the floor plan annexed to this Agreement, together with twelve (12) allocated parking spaces.
+
+## Grant of Licence
+The Licensor grants the Licensee a licence to occupy the Premises for the Permitted Use during the Term.
+
+This Agreement creates a contractual licence only. It does not create a tenancy or any other interest in land, and the Licensor retains control, possession and management of the Building.
+
+The Licensee may use the Common Parts, including the bookable meeting rooms on the ground floor, in accordance with the booking rules of the Building.
+
+## Term
+The licence shall commence on the Effective Date and shall continue for a fixed term of {initial_term}, ending on {expiration_date} (the "Term").
+
+This Agreement shall not renew automatically. Any extension of the Term must be agreed in writing and signed by both parties. If the Licensee wishes to discuss an extension, it shall notify the Licensor in writing no later than sixty (60) days before the end of the Term, and the Licensor shall be under no obligation to agree to any extension.
+
+If the Licensee remains in occupation after the end of the Term without a written extension, it shall pay a daily occupation fee equal to one hundred and fifty per cent (150%) of the daily equivalent of the Licence Fee for each day of occupation.
+
+## Licence Fee and Charges
+The Licensee shall pay the Licensor a monthly licence fee of EUR 6,800 (six thousand eight hundred euros), exclusive of VAT, monthly in advance on the first working day of each month.
+
+The Licence Fee includes heating, air conditioning, electricity, cleaning of the Premises, building security and standard internet connectivity. Additional cleaning, catering and telephone services are charged separately at the Licensor's published rates.
+
+On each anniversary of the Effective Date, the Licence Fee shall be adjusted by seventy-five per cent (75%) of the annual change in the ISTAT consumer price index for households of blue- and white-collar workers.
+
+## Security Deposit
+On signing this Agreement, the Licensee shall pay the Licensor a security deposit of EUR 20,400 (twenty thousand four hundred euros), equal to three (3) months' Licence Fee.
+
+The Licensor shall return the deposit, without interest, within thirty (30) days after the end of the Term, less any amounts properly due from the Licensee under this Agreement.
+
+## Use of the Premises
+The Licensee shall use the Premises as offices only and for no other purpose (the "Permitted Use").
+
+The Licensee shall not make any alterations or additions to the Premises without the prior written consent of the Licensor.
+
+The Licensee shall comply with the regulations of the Building, including its health and safety and fire safety rules, and shall not cause any nuisance or disturbance to other occupiers of the Building.
+
+The Licensee shall have access to the Premises twenty-four (24) hours a day, seven (7) days a week, using the access cards issued by the Licensor.
+
+## Maintenance and Repairs
+The Licensor shall keep the structure of the Building, the Common Parts and the building systems, including lifts, heating and air conditioning, in good repair and working order.
+
+The Licensee shall keep the interior of the Premises clean and in good condition and shall promptly notify the Licensor of any damage or defect.
+
+## Insurance
+The Licensor shall insure the Building against fire and the other risks normally insured against by prudent owners of similar buildings.
+
+The Licensee shall maintain public liability insurance with a limit of not less than EUR 2,000,000 per event and shall insure its own equipment and contents in the Premises.
+
+## Early Termination
+The Licensee may terminate this Agreement at any time after the first twelve (12) months of the Term by giving the Licensor not less than three (3) months' written notice.
+
+The Licensor may terminate this Agreement with immediate effect by written notice if any part of the Licence Fee remains unpaid for thirty (30) days after its due date, or if the Licensee commits a material breach of this Agreement and fails to remedy it within twenty-one (21) days after receiving written notice of the breach.
+
+Termination of this Agreement shall not affect any rights or remedies of either party that have accrued up to the date of termination.
+
+## Surrender of the Premises
+At the end of the Term, or on earlier termination, the Licensee shall remove all of its belongings and return the Premises clean and in the same condition as at the Effective Date, fair wear and tear excepted, and shall return all access cards.
+
+Any items left in the Premises more than ten (10) days after the end of the Term may be removed and disposed of by the Licensor at the Licensee's cost.
+
+## Limitation of Liability
+Nothing in this Agreement limits or excludes either party's liability for death or personal injury caused by negligence, for fraud, or for any other liability that cannot be limited or excluded by law.
+
+Subject to clause {n}.1, the Licensor shall not be liable for any loss of profits, loss of business or indirect loss suffered by the Licensee, or for any interruption of services caused by events outside its reasonable control, and its total liability under this Agreement shall not exceed the total Licence Fee paid by the Licensee in the twelve (12) months preceding the claim.
+
+@include notices
+
+@include general
+
+@include governing_law

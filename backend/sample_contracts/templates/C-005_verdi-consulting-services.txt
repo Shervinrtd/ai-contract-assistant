@@ -1,0 +1,73 @@
+contract_id: C-005
+slug: verdi-consulting-services
+title: Consulting Services Agreement
+contract_type: Consulting services
+counterparty: Verdi & Partners Consulting S.r.l.
+counterparty_description: a company incorporated in Italy with its registered office in Milan, Italy
+counterparty_role: Consultant
+counterparty_signatory: Andrea Verdi
+counterparty_signatory_title: Managing Partner
+company_role: Client
+term_months: 12
+expires_in_days: -40
+===
+# Background
+The Consultant provides management and operations consulting services to industrial companies.
+
+The Client wishes to engage the Consultant to review and improve its order-to-delivery processes, and the Consultant has agreed to provide those services on the terms of this Agreement.
+
+## Definitions
+In this Agreement the following definitions apply:
+- "Deliverables" means all reports, process maps, recommendations and other materials prepared by the Consultant for the Client in the course of the Services;
+- "Services" means the consulting services described in the Statement of Work;
+- "Statement of Work" means the statement of work attached as Schedule 1, as amended by agreement between the parties from time to time.
+
+## Services
+The Consultant shall provide the Services with reasonable skill, care and diligence and in accordance with good industry practice.
+
+The Services shall be delivered in three phases: an assessment of the Client's current order-to-delivery process, the design of a target process, and support for its implementation, as further described in the Statement of Work.
+
+The Consultant shall assign the key personnel named in the Statement of Work and shall not replace them without the Client's prior written consent, which shall not be unreasonably withheld.
+
+## Term
+This Agreement shall commence on the Effective Date and, unless terminated earlier in accordance with clause {ref:Termination}, shall continue for a fixed term of {initial_term}, ending on {expiration_date} (the "Term").
+
+This Agreement shall expire automatically at the end of the Term and shall not renew. Any extension shall require a written amendment signed by both parties.
+
+## Fees and Expenses
+The Client shall pay the Consultant a daily rate of EUR 950 (nine hundred and fifty euros) per consultant day, exclusive of VAT, up to a maximum of one hundred and twenty (120) consultant days unless otherwise agreed in writing.
+
+The Client shall reimburse reasonable travel expenses incurred with its prior approval, in accordance with the Client's travel policy.
+
+The Consultant shall invoice monthly in arrears, enclosing a timesheet of the days worked. Each invoice is payable within thirty (30) days of receipt.
+
+## Intellectual Property
+All intellectual property rights in the Deliverables shall vest in the Client on payment of the relevant fees.
+
+The Consultant retains ownership of its pre-existing methods, tools and know-how, and grants the Client a perpetual, royalty-free licence to use them to the extent that they are incorporated in the Deliverables.
+
+@include confidentiality
+
+## Termination
+Either party may terminate this Agreement for convenience by giving the other party not less than thirty (30) days' written notice.
+
+Either party may terminate this Agreement with immediate effect by written notice if the other party commits a material breach of this Agreement and fails to remedy that breach within fifteen (15) days after receiving written notice of it.
+
+On termination, the Client shall pay the Consultant for the Services properly performed up to the date of termination, and the Consultant shall deliver to the Client all Deliverables, whether complete or in progress.
+
+## Non-Solicitation
+During the Term and for twelve (12) months after it ends, neither party shall solicit or employ any employee of the other party who has been involved in the Services without the prior written consent of the other party.
+
+## Limitation of Liability
+Nothing in this Agreement limits or excludes either party's liability for death or personal injury caused by negligence, for fraud, or for any other liability that cannot be limited or excluded by law.
+
+Subject to clause {n}.1, the Consultant's total liability under this Agreement shall not exceed the total fees paid to the Consultant under this Agreement, and neither party shall be liable for any loss of profits or any indirect or consequential loss.
+
+## Independent Contractor
+The Consultant is an independent contractor. Nothing in this Agreement creates a relationship of employment, partnership or agency between the parties.
+
+@include notices
+
+@include general
+
+@include governing_law

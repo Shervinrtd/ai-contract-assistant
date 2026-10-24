@@ -1,0 +1,69 @@
+contract_id: C-004
+slug: brightline-mutual-nda
+title: Mutual Non-Disclosure Agreement
+contract_type: NDA
+counterparty: Brightline Analytics Ltd
+counterparty_description: a company incorporated in Ireland with its registered office in Dublin, Ireland
+counterparty_role: Brightline
+counterparty_signatory: Aoife Gallagher
+counterparty_signatory_title: Head of Partnerships
+company_role: Corvina
+term_months: 36
+expires_in_days: 730
+===
+# Background
+The parties wish to explore a potential collaboration for the joint development of predictive maintenance analytics for industrial equipment (the "Purpose").
+
+In connection with the Purpose, each party expects to disclose confidential information to the other party and wishes to protect that information on the terms of this Agreement.
+
+## Definitions
+In this Agreement the following definitions apply:
+- "Confidential Information" means all information of a technical, commercial or financial nature disclosed by one party (the "Disclosing Party") to the other party (the "Recipient") in connection with the Purpose, whether before or after the Effective Date and in whatever form, including source code, algorithms, data sets, customer lists, pricing and business plans;
+- "Representatives" means a party's employees, officers, professional advisers and subcontractors who need to know the Confidential Information for the Purpose.
+
+## Obligations of Confidentiality
+The Recipient shall keep the Disclosing Party's Confidential Information strictly confidential and shall not disclose it to any person other than its Representatives.
+
+The Recipient shall use the Confidential Information solely for the Purpose and for no other purpose.
+
+The Recipient shall protect the Confidential Information with at least the same degree of care that it applies to its own confidential information, and in any event with no less than a reasonable degree of care.
+
+The Recipient shall ensure that its Representatives are bound by obligations of confidentiality no less strict than those in this Agreement, and shall be responsible for any breach of those obligations by its Representatives.
+
+## Exceptions
+The obligations in clause {ref:Obligations of Confidentiality} shall not apply to information that:
+- (a) is or becomes generally available to the public other than through a breach of this Agreement;
+- (b) was lawfully in the possession of the Recipient before it was disclosed by the Disclosing Party;
+- (c) is received from a third party who is not under an obligation of confidentiality in respect of it; or
+- (d) is independently developed by the Recipient without use of the Confidential Information.
+
+The Recipient may disclose Confidential Information to the extent required by law, by a court of competent jurisdiction or by a regulatory authority, provided that, where permitted, it gives the Disclosing Party prompt written notice so that the Disclosing Party may seek a protective order.
+
+## Return of Information
+At any time on written request of the Disclosing Party, the Recipient shall promptly return or destroy all documents and materials containing the Disclosing Party's Confidential Information and shall confirm in writing that it has done so.
+
+The Recipient may retain copies held in automatic electronic backup systems and copies that it is required to retain by law, provided that they remain subject to the obligations of confidentiality in this Agreement.
+
+## No Licence and No Commitment
+All Confidential Information remains the property of the Disclosing Party. Nothing in this Agreement grants the Recipient any licence or other right in respect of any intellectual property of the Disclosing Party.
+
+Nothing in this Agreement obliges either party to enter into any further agreement or to proceed with the collaboration described in the Purpose.
+
+Confidential Information is provided "as is", and the Disclosing Party gives no warranty as to its accuracy or completeness.
+
+## Duration
+This Agreement shall come into force on the Effective Date and shall remain in force for a period of {initial_term}, ending on {expiration_date}.
+
+The obligations of confidentiality in this Agreement shall continue to apply to Confidential Information disclosed during that period for a further two (2) years after {expiration_date}.
+
+## Remedies
+Each party acknowledges that damages alone may not be an adequate remedy for a breach of this Agreement, and that the Disclosing Party shall be entitled to seek injunctive relief or other equitable remedies for any threatened or actual breach.
+
+## Data Protection
+If any Confidential Information includes personal data, each party shall comply with its obligations under the General Data Protection Regulation (EU) 2016/679, and the parties shall not share personal data under this Agreement unless they have first entered into an appropriate data sharing agreement.
+
+@include notices
+
+@include general
+
+@include governing_law

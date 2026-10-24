@@ -1,0 +1,22 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Generated data (recreated by the setup scripts, so dates never go stale)
+backend/data/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
