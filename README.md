@@ -88,7 +88,7 @@ server after changing it.
 | `LLM_API_KEY` | (empty) | API key. Empty means mock mode. `OPENAI_API_KEY` is also accepted. |
 | `LLM_MODEL` | `gpt-6-luna` | Any model with tool calling in the Chat Completions API |
 | `LLM_REASONING_EFFORT` | `none` | Sent as `reasoning_effort` (gpt-6-luna needs `none` for tool calling). Leave empty for providers that don't support it. |
-| `LLM_BASE_URL` | OpenAI | Any OpenAI-compatible endpoint, e.g. Azure / Microsoft Foundry `https://<resource>.openai.azure.com/openai/v1/`, or Ollama `http://localhost:11434/v1` |
+| `LLM_BASE_URL` | OpenAI | Another OpenAI-compatible endpoint, e.g. Azure / Microsoft Foundry `https://<resource>.openai.azure.com/openai/v1/`, or Ollama `http://localhost:11434/v1`. Only OpenAI has been tested; other providers should work but are untested. |
 | `LLM_MODE` | `auto` | `auto` (real model if a key is set), `openai`, or `mock` |
 | `AGENT_MAX_ROUNDS` | `5` | Maximum model ↔ tool round trips per question |
 | `RETRIEVAL_MIN_SCORE` | `0.25` | Clause matches below this similarity count as "no evidence" |
@@ -303,7 +303,7 @@ Each row lists what was built, what was weighed against it, and why.
 | **Per-contract retrieval** (`group_by_contract`) | Plain top-k over all chunks | For "which contracts...?", top-k can return five chunks from two contracts and silently miss a third. |
 | **MCP over Streamable HTTP**, as a separate process | stdio subprocess started by the API; server inside the API process | It can be tested on its own (MCP Inspector, `check_mcp`) and used by any MCP client. It also avoids subprocess issues with stdio on Windows. An in-process server would not be real MCP. |
 | **Hand-written agent loop** (about 100 lines) | PydanticAI, OpenAI Agents SDK, LangGraph, Microsoft Agent Framework | Every step is visible and explainable, and citation checking, the round limit and the tool trace are easy to add. There's no framework version churn or lagging MCP adapters. |
-| **Chat Completions API**, configurable endpoint, `gpt-6-luna` | Responses API; Microsoft Foundry; a local model via Ollama; free hosted tiers | OpenAI, Azure / Microsoft Foundry, Groq and Ollama all support Chat Completions, so switching provider is configuration (`LLM_BASE_URL`). `gpt-6-luna` is OpenAI's cheapest current model and supports tool calling here with `reasoning_effort: none`. Small local models pick tools less reliably. |
+| **Chat Completions API**, configurable endpoint, `gpt-6-luna` | Responses API; Microsoft Foundry; a local model via Ollama; free hosted tiers | Azure / Microsoft Foundry, Groq and Ollama also offer Chat Completions-compatible endpoints, so switching provider should only need configuration (`LLM_BASE_URL`). Only OpenAI has been tested. `gpt-6-luna` is OpenAI's cheapest current model and supports tool calling here with `reasoning_effort: none`. Small local models pick tools less reliably. |
 | **Citations checked against tool results** | Trusting the model's citations | The model can't cite a clause it never retrieved. Invented ids are dropped and reported. |
 | **MCP SDK v1** (`>=1.30,<2`) | SDK v2 (August 2026) | v1 is what most examples and tooling target; v2 renamed the main classes. |
 | **Remote = assistant**, host = contract list | Remote = contract list; an empty shell with two remotes | The assistant is the reusable piece, an AI widget any federated shell can mount, which is the integration story the brief asks for. The federation setup is the same either way, and two remotes would be more than asked. |

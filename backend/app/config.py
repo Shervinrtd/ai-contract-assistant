@@ -47,8 +47,8 @@ def display_path(path: Path) -> str:
 
 # ----------------------------------------------------------------- assistant
 
-# Any OpenAI-compatible Chat Completions endpoint works: OpenAI (default), Azure / Microsoft
-# Foundry, Groq, Ollama... Switching provider is a matter of these settings.
+# Any OpenAI-compatible Chat Completions endpoint can be used: OpenAI (default), Azure / Microsoft
+# Foundry, Groq, Ollama... should only need these settings (tested with OpenAI only).
 LLM_API_KEY = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
 LLM_BASE_URL = os.getenv("LLM_BASE_URL") or None          # None = https://api.openai.com/v1
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-6-luna")
