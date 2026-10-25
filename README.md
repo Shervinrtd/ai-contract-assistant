@@ -292,23 +292,24 @@ No invented citations were removed in this run: every id the model cited had com
 
 ## Key design decisions
 
-The alternatives considered for each decision, and what each choice gives up, are in
-[docs/design-decisions.md](docs/design-decisions.md).
+Each row lists what was built, what was weighed against it, and why.
 
-| Decision | Why |
-|---|---|
-| **Contracts are PDFs**, generated from templates at setup time | Real contracts are PDFs, and page-level citations need pages. Generating them keeps every date relative to today, so "next 30 days" always has an answer, and keeps the PDF text and the list metadata consistent. Ingestion only reads the PDFs, never the templates. |
-| **One chunk per clause** with page ranges | A clause is the natural unit of legal meaning and gives clean citations ("clause 8, pp. 2-3"). Fixed-size chunks would split clauses mid-sentence. |
-| **Local embeddings** in Chroma | No API key is needed for retrieval, so mock mode and reviewers without a key still get real search. Chroma gives persistence and metadata filtering in a few lines. |
-| **Retrieval is an MCP tool**, not an always-on step | The model decides when to read the contracts, so one loop handles metadata questions, content questions and multi-step combinations. Always injecting passages would put dates from contract text in front of the model and tempt it to skip the expiration tool. |
-| **Per-contract retrieval** (`group_by_contract`) | Questions about every contract can't silently miss one, which plain top-k retrieval can. |
-| **MCP over Streamable HTTP**, as a separate process | It's a real MCP server that any client can use and that can be tested on its own (MCP Inspector, `check_mcp`). It also avoids subprocess issues with stdio on Windows. |
-| **Hand-written agent loop** (about 100 lines) instead of a framework | Every step is visible and explainable. Citation checking, the round limit and the tool trace are easy to add. There's no framework version churn. |
-| **Chat Completions API**, configurable endpoint | The same client works with OpenAI, Azure / Microsoft Foundry, Groq or Ollama. `gpt-6-luna` is OpenAI's cheapest current model and supports tool calling here with `reasoning_effort: none`. |
-| **Citations checked against tool results** | The model can't cite a clause it never retrieved. Invented ids are dropped and reported. |
-| **Remote = assistant**, host = contract list | The assistant is the reusable piece, an AI widget any federated shell can mount. That's the integration story the brief asks to demonstrate. |
-| **Dynamic host** (runtime manifest) | Remote URLs change per environment without rebuilding the host. |
-| **Status derived from today's date** | A contract that passes its expiration date shows as Expired without re-running setup. |
+| Decision | Alternatives considered | Why this one |
+|---|---|---|
+| **Retrieval is an MCP tool** (`search_contract_clauses`) | Always retrieve before answering; a keyword router that picks RAG or tools | The model decides when to read the contracts, so one loop handles metadata questions, content questions and multi-step combinations. Always retrieving puts contract text, including dates, in every prompt and tempts the model to skip the expiration tool. A router breaks on paraphrases and takes tool choice away from the model; that idea survives as [mock mode](#mock-mode). |
+| **Contracts are PDFs**, generated from templates at setup | Markdown files; hand-made PDFs | Real contracts are PDFs, and page citations need pages. Generating them keeps dates relative to today (hand-made PDFs would go stale within weeks) and the PDF text consistent with the list metadata. Ingestion only reads the PDFs, never the templates. |
+| **One chunk per clause** with page ranges | Fixed-size chunks with overlap | A clause is the natural unit of legal meaning and gives clean citations ("clause 8, pp. 2-3"). Fixed-size chunks split clauses mid-sentence. |
+| **Chroma with local embeddings** | numpy cosine search; API embeddings; keyword search (BM25); hybrid search | Persistence and metadata filtering in a few lines. The local model means retrieval works without an API key, so mock mode and reviewers without a key still get real search. BM25 misses paraphrases, and hybrid search is overkill for five contracts. numpy remains a 30-line fallback. |
+| **Per-contract retrieval** (`group_by_contract`) | Plain top-k over all chunks | For "which contracts...?", top-k can return five chunks from two contracts and silently miss a third. |
+| **MCP over Streamable HTTP**, as a separate process | stdio subprocess started by the API; server inside the API process | It can be tested on its own (MCP Inspector, `check_mcp`) and used by any MCP client. It also avoids subprocess issues with stdio on Windows. An in-process server would not be real MCP. |
+| **Hand-written agent loop** (about 100 lines) | PydanticAI, OpenAI Agents SDK, LangGraph, Microsoft Agent Framework | Every step is visible and explainable, and citation checking, the round limit and the tool trace are easy to add. There's no framework version churn or lagging MCP adapters. |
+| **Chat Completions API**, configurable endpoint, `gpt-6-luna` | Responses API; Microsoft Foundry; a local model via Ollama; free hosted tiers | OpenAI, Azure / Microsoft Foundry, Groq and Ollama all support Chat Completions, so switching provider is configuration (`LLM_BASE_URL`). `gpt-6-luna` is OpenAI's cheapest current model and supports tool calling here with `reasoning_effort: none`. Small local models pick tools less reliably. |
+| **Citations checked against tool results** | Trusting the model's citations | The model can't cite a clause it never retrieved. Invented ids are dropped and reported. |
+| **MCP SDK v1** (`>=1.30,<2`) | SDK v2 (August 2026) | v1 is what most examples and tooling target; v2 renamed the main classes. |
+| **Remote = assistant**, host = contract list | Remote = contract list; an empty shell with two remotes | The assistant is the reusable piece, an AI widget any federated shell can mount, which is the integration story the brief asks for. The federation setup is the same either way, and two remotes would be more than asked. |
+| **Dynamic host** (manifest read at runtime) | Remote URL fixed at build time | Remote URLs can change per environment without rebuilding the host. |
+| **Mock mode is a rule-based model** behind the same interface | Canned answers; recorded and replayed model responses | The real loop, MCP tools, retrieval and citations still run. Canned answers would fake everything, and replay only works for the questions that were recorded. |
+| **Status derived from today's date** | Status stored at setup | A contract that passes its expiration date shows as Expired without re-running setup. |
 
 ## Tests
 
