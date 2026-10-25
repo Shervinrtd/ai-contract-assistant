@@ -1,0 +1,54 @@
+<section class="card">
+  <header class="head">
+    <div>
+      <h2>Contracts</h2>
+      <p class="sub">{{ contracts().length }} contracts · soonest expiration first</p>
+    </div>
+    <input type="search" placeholder="Filter by title, counterparty, status…" [value]="filter()" (input)="filter.set($any($event.target).value)" />
+  </header>
+
+  @if (loading()) {
+    <p class="state">Loading contracts…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contract</th>
+            <th>Counterparty</th>
+            <th>Expires</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of visible(); track c.id) {
+            <tr>
+              <td>
+                <div class="title">{{ c.title }}</div>
+                <div class="meta">{{ c.id }} · {{ c.contract_type }}</div>
+              </td>
+              <td>{{ c.counterparty }}</td>
+              <td>
+                <div class="date">{{ c.expiration_date | date: 'd MMM y' }}</div>
+                <div class="meta">{{ relative(c.days_until_expiration) }}</div>
+              </td>
+              <td>
+                @switch (statusOf(c)) {
+                  @case ('expired') { <span class="status expired">Expired</span> }
+                  @case ('soon') { <span class="status soon">Expiring soon</span> }
+                  @default { <span class="status active">{{ c.status }}</span> }
+                }
+              </td>
+              <td><a class="pdf" [href]="apiBase + c.pdf_url" target="_blank" rel="noopener">PDF</a></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="state">No contracts match “{{ filter() }}”.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

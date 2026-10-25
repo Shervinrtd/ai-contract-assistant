@@ -1,0 +1,117 @@
+<section class="assistant">
+  <header class="bar">
+    <div>
+      <h2>Contract assistant</h2>
+      <p class="sub">Answers come only from the contracts, with sources.</p>
+    </div>
+    @if (health(); as h) {
+      @if (h.assistant_mode === 'mock') {
+        <span class="badge mock" title="No API key configured: rule-based answers, real tools and retrieval">Mock mode</span>
+      } @else {
+        <span class="badge live" title="Model chosen in backend/.env">{{ h.model }}</span>
+      }
+    } @else if (healthError()) {
+      <span class="badge offline">API offline</span>
+    }
+  </header>
+
+  <div class="log" #log>
+    @if (turns().length === 0) {
+      <div class="empty">
+        <p>Try one of these:</p>
+        <div class="examples">
+          @for (q of examples; track q) {
+            <button type="button" class="chip" (click)="ask(q)" [disabled]="pending()">{{ q }}</button>
+          }
+        </div>
+      </div>
+    }
+
+    @for (turn of turns(); track $index) {
+      <div class="msg user">{{ turn.question }}</div>
+
+      @if (turn.error) {
+        <div class="msg error">{{ turn.error }}</div>
+      } @else if (turn.response; as r) {
+        <div class="msg bot">
+          @if (r.tool_calls.length) {
+            <details class="tools">
+              <summary>
+                Used {{ r.tool_calls.length }} MCP tool{{ r.tool_calls.length === 1 ? '' : 's' }}:
+                @for (t of r.tool_calls; track $index) {
+                  <code>{{ t.name }}</code>{{ $last ? '' : ', ' }}
+                }
+              </summary>
+              <ol>
+                @for (t of r.tool_calls; track $index) {
+                  <li [class.failed]="!t.ok">
+                    <code>{{ t.name }}({{ args(t.arguments) }})</code>
+                    <span class="result">→ {{ t.summary }} · {{ t.duration_ms }} ms</span>
+                  </li>
+                }
+              </ol>
+            </details>
+          }
+
+          <div class="answer">
+            @for (block of turn.blocks; track $index) {
+              @if (block.kind === 'list') {
+                <ul>
+                  @for (item of block.items; track $index) {
+                    <li>
+                      <ng-container *ngTemplateOutlet="inline; context: { $implicit: item, turn: turn }" />
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p><ng-container *ngTemplateOutlet="inline; context: { $implicit: block.content, turn: turn }" /></p>
+              }
+            }
+          </div>
+
+          @if (r.citations.length) {
+            <ol class="sources">
+              @for (c of r.citations; track c.n) {
+                <li [value]="c.n">
+                  <a [href]="api.pdfUrl(c.pdf_url)" target="_blank" rel="noopener">{{ c.label }}</a>
+                  @if (c.quote) {
+                    <blockquote>{{ c.quote }}</blockquote>
+                  }
+                </li>
+              }
+            </ol>
+          } @else {
+            <p class="note">No sources cited.</p>
+          }
+          @for (w of r.warnings; track $index) {
+            <p class="note warn">{{ w }}</p>
+          }
+        </div>
+      } @else {
+        <div class="msg bot thinking">Searching the contracts…</div>
+      }
+    }
+  </div>
+
+  <form class="composer" (submit)="$event.preventDefault(); ask()">
+    <textarea
+      rows="2"
+      placeholder="Ask about the contracts…"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      name="question"
+      (keydown.enter)="onEnter($event)"
+      [disabled]="pending()"
+    ></textarea>
+    <div class="actions">
+      @if (turns().length) {
+        <button type="button" class="ghost" (click)="clear()" [disabled]="pending()">Clear</button>
+      }
+      <button type="submit" [disabled]="!canSend()">Ask</button>
+    </div>
+  </form>
+</section>
+
+<ng-template #inline let-parts let-turn="turn">
+  @for (part of parts; track $index) {@switch (part.kind) {@case ('bold') {<strong>{{ part.text }}</strong>}@case ('italic') {<em>{{ part.text }}</em>}@case ('cite') {@if (citation(turn, part.n); as c) {<a class="cite" [href]="api.pdfUrl(c.pdf_url)" target="_blank" rel="noopener" [title]="c.label">[{{ part.n }}]</a>} @else {<span class="cite">[{{ part.n }}]</span>}}@default {<span>{{ part.text }}</span>}}}
+</ng-template>

@@ -5,7 +5,7 @@ a contract list, a RAG assistant that answers from the contract PDFs with citati
 (contract, clause and page), an MCP server whose tools the LLM chooses to call, and an
 Angular frontend split into a host and a remote with Native Federation.
 
-> **Status:** steps 1-5 of 7 done: the whole backend (PDF ingestion, contracts API, MCP server, retrieval and the AI assistant). The Angular frontend is next.
+> **Status:** steps 1-6 of 7 done: the backend (PDF ingestion, contracts API, MCP server, retrieval, AI assistant) and the federated Angular frontend. Final documentation pass next.
 > The full run guide, architecture notes and the RAG / MCP explanation will be added as the remaining steps land.
 
 ## Setup so far
@@ -62,6 +62,19 @@ editing `.env`):
 python -m scripts.ask "Which contracts expire in the next 30 days?"
 python -m scripts.ask --demo      # the six demo questions; add --mock to force mock mode
 ```
+
+**Frontend.** Requires Node.js 22.22+, 24.15+ or 26 (Angular 22). In a new terminal:
+
+```powershell
+cd frontend
+npm install
+npm start                         # remote on :4201 and host on :4200 together
+```
+
+Open **http://localhost:4200**. You'll see the contract list on the left and the assistant, loaded at runtime from
+the remote, on the right. The remote also runs on its own at http://localhost:4201.
+
+In total, three terminals run at once: the MCP server, the API (`uvicorn`) and the frontend (`npm start`).
 
 ## What the setup commands do
 
@@ -196,6 +209,41 @@ the same tools a model would (including multi-step plans) and the answer quotes 
 retrieval and citation checking are all real. Answers are labelled as mock, and `/health` reports
 `assistant_mode: "mock"`. It's meant for trying the UI and API without a key, not as a replacement for the model.
 
+## Frontend and Native Federation
+
+`frontend/` is one Angular 22 workspace with two applications, wired together with
+[Native Federation](https://www.npmjs.com/package/@angular-architects/native-federation) (v22, browser-native
+ES modules and import maps on Angular's esbuild builder):
+
+| App | Role | Port | Contents |
+|---|---|---|---|
+| `projects/shell` | **host** | 4200 | Header and routing, the contract list (`GET /contracts`), a panel that hosts the remote |
+| `projects/assistant` | **remote** | 4201 | The chat: example questions, mode badge, tool-call trace, answers with numbered citations that open the PDF at the cited page |
+
+**How it's configured**
+
+- **The remote exposes a component.** In `projects/assistant/federation.config.mjs`,
+  `exposes: { './Assistant': './projects/assistant/src/app/assistant/assistant.component.ts' }`. Building it produces
+  `remoteEntry.json`, which describes the exposed module and the shared packages.
+- **The host is a "dynamic host".** `projects/shell/public/federation.manifest.json` maps remote names to URLs
+  (`"assistant": "http://localhost:4201/remoteEntry.json"`) and is read at runtime, so another environment only needs
+  a different manifest, not a rebuild.
+- **Startup.** `projects/shell/src/main.ts` calls `initFederation('federation.manifest.json')` and passes the returned
+  federation instance into Angular (`bootstrap.ts` provides it under the `FEDERATION` token). Components load remotes
+  with `federation.loadRemoteModule('assistant', './Assistant')`, the API Native Federation v4 recommends.
+- **Two integration points, same remote component.**
+  - The dashboard panel (`remote-assistant.ts`) loads it and renders it with `NgComponentOutlet`.
+  - The `/assistant` route mounts it as a full page with `loadComponent`.
+- **Shared dependencies.** Angular, RxJS and tslib are shared as strict-version singletons, so host and remote run
+  one copy of Angular. The animation entry points of `@angular/platform-browser` are skipped because the app doesn't
+  use `@angular/animations`.
+- **The remote is self-contained.** It calls the API with `fetch` and has no provider requirements, so any host can
+  mount it. Its styles are component-scoped and travel with it.
+- **Failure handling.** If the remote is down, the host still starts, the contract list still works and the panel
+  explains how to start the remote. If the API is down, both apps say so.
+
+The host has no build-time dependency on the remote's code: the remote can be rebuilt and redeployed on its own.
+
 ## Sample contracts
 
 | ID | Contract | Counterparty | Expires | Built to test |
@@ -206,9 +254,23 @@ retrieval and citation checking are all real. Answers are labelled as mock, and 
 | C-004 | Mutual Non-Disclosure Agreement | Brightline Analytics Ltd | in ~2 years | no termination clause, so "insufficient evidence" |
 | C-005 | Consulting Services Agreement | Verdi & Partners Consulting S.r.l. | 40 days ago | expired status |
 
-## Project layout (so far)
+## Project layout
 
 ```
+frontend/
+  package.json                npm start runs both apps (concurrently)
+  angular.json                two projects, built with the Native Federation builder
+  projects/
+    shell/                    host (4200)
+      federation.config.mjs   host federation config (shared packages)
+      public/federation.manifest.json   remote name -> remoteEntry.json URL (read at runtime)
+      src/main.ts             initFederation, then bootstrap with the federation instance
+      src/app/federation.ts   FEDERATION token and loadAssistant()
+      src/app/contracts/      contract list
+      src/app/remote-assistant/   panel that loads the remote component
+    assistant/                remote (4201)
+      federation.config.mjs   exposes ./Assistant
+      src/app/assistant/      chat component, API client (fetch), safe answer formatter
 backend/
   app/
     main.py                   FastAPI app: CORS, error handling, routers
